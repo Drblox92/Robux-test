@@ -3,23 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Test Robux Site</title>
+<title>Robux Missions Test</title>
+<style>
+body { font-family: Arial; text-align:center; margin: 20px; }
+button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+#missions { margin-top: 20px; display:none; }
+</style>
 </head>
 <body>
-<h1>Bienvenue sur mon site Robux Test</h1>
-<p>Entrez votre pseudo Roblox :</p>
+
+<h1>Bienvenue sur Robux Test</h1>
+<p>Entre ton pseudo Roblox :</p>
 <input type="text" id="username" placeholder="Ton pseudo Roblox">
 <button onclick="start()">Commencer</button>
+
+<div id="missions">
+<h2>Missions disponibles :</h2>
+<button onclick="completeMission(10)">Regarder une pub (+10 points)</button>
+<button onclick="completeMission(20)">Télécharger une app (+20 points)</button>
+<button onclick="completeMission(15)">Répondre à un sondage (+15 points)</button>
+<p>Points accumulés : <span id="points">0</span></p>
+<button onclick="redeem()">Retirer Robux (simulation)</button>
 <p id="result"></p>
+</div>
+
 <script>
+let points = 0;
+let username = "";
+
 function start() {
-  let user = document.getElementById("username").value;
-  if(user.trim() === "") {
-    document.getElementById("result").innerText = "❌ Merci d’entrer un pseudo.";
-  } else {
-    document.getElementById("result").innerText = "✅ Bienvenue " + user + "!";
+  username = document.getElementById("username").value;
+  if(username.trim() === "") {
+    alert("❌ Merci d’entrer un pseudo.");
+    return;
   }
+  document.getElementById("missions").style.display = "block";
+  document.getElementById("result").innerText = "✅ Bienvenue " + username + " !";
+}
+
+function completeMission(value) {
+  points += value;
+  document.getElementById("points").innerText = points;
+}
+
+function redeem() {
+  if(points === 0) {
+    alert("❌ Tu n’as aucun point à échanger.");
+    return;
+  }
+  alert("✅ Bravo " + username + "! Tu as échangé " + points + " points (simulation).");
+  points = 0;
+  document.getElementById("points").innerText = points;
 }
 </script>
+
 </body>
 </html>
