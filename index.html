@@ -3,27 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Robux Test</title>
+<title>Robux Simulator</title>
 <style>
 body { font-family: Arial; margin:0; background:#f0f0f0; }
 header { display:flex; justify-content:flex-end; padding:10px 20px; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.1); position:relative; }
 .menu-btn { cursor:pointer; padding:10px; background:#ffcc00; border:none; border-radius:5px; font-weight:bold; }
-.menu-content { display:none; position:absolute; top:50px; right:20px; background:#fff; border:1px solid #ccc; border-radius:10px; padding:10px; width:200px; box-shadow:0 2px 10px rgba(0,0,0,0.2); text-align:left; }
-.menu-content img { width:50px; height:50px; border-radius:50%; vertical-align:middle; margin-right:10px; }
-.menu-content p { display:inline-block; vertical-align:middle; margin:0; font-weight:bold; }
+.menu-content { display:none; position:absolute; top:50px; right:20px; background:#fff; border:1px solid #ccc; border-radius:10px; padding:10px; width:220px; box-shadow:0 2px 10px rgba(0,0,0,0.2); text-align:center; }
+.menu-content img { width:50px; height:50px; border-radius:50%; margin-bottom:5px; }
+.menu-username { font-weight:bold; margin:0; }
+.menu-points { font-size:14px; margin:0; display:flex; align-items:center; justify-content:center; gap:5px; }
 
-.container { text-align:center; margin:20px; background:white; padding:20px; border-radius:15px; }
-
+.container { text-align:center; margin:20px; background:white; padding:20px; border-radius:15px; transition: all 0.3s ease; }
 button { padding:12px 25px; margin:5px; cursor:pointer; border:none; border-radius:8px; background:linear-gradient(45deg,#ffcc00,#ff9900); color:white; font-weight:bold; transition:transform 0.2s; }
 button:hover { transform:scale(1.05); }
 
-#missions { margin-top:20px; display:none; }
-
-footer { position:fixed; bottom:0; width:100%; display:flex; justify-content:space-around; background:#fff; padding:10px 0; box-shadow:0 -2px 5px rgba(0,0,0,0.1); }
-footer button { background:#4CAF50; }
+.section { display:none; margin-top:20px; opacity:0; transition: opacity 0.5s ease; }
 
 .progress-bar { background:#ddd; width:200px; height:20px; border-radius:10px; display:inline-block; margin-top:10px; }
 .progress-fill { background:#4CAF50; width:0%; height:100%; border-radius:10px; }
+
+footer { position:fixed; bottom:0; width:100%; display:flex; justify-content:space-around; background:#fff; padding:10px 0; box-shadow:0 -2px 5px rgba(0,0,0,0.1); }
+footer button { background:#4CAF50; }
+input { padding:8px; border-radius:5px; border:1px solid #ccc; width:150px; }
 </style>
 </head>
 <body>
@@ -32,41 +33,72 @@ footer button { background:#4CAF50; }
   <button class="menu-btn" onclick="toggleMenu()">Menu</button>
   <div class="menu-content" id="menu">
     <img id="avatar" src="https://www.roblox.com/headshot-thumbnail/image?userId=1&width=50&height=50&format=png" alt="avatar">
-    <p id="menu-username">Pseudo</p>
+    <p class="menu-username" id="menu-username">Pseudo</p>
+    <p class="menu-points"><img src="https://cdn.iconscout.com/icon/free/png-256/robux-282366.png" style="width:16px; vertical-align:middle;"> <span id="menu-points-count">0</span></p>
   </div>
 </header>
 
-<div class="container">
-  <h1>Robux Test</h1>
-  <p>Entre ton pseudo Roblox :</p>
-  <input type="text" id="username" placeholder="Ton pseudo Roblox">
-  <button onclick="start()">Commencer</button>
+<div class="container" id="main-container">
+  <h1>Robux Simulator</h1>
+  <div id="enter-pseudo">
+    <p>Entre ton pseudo Roblox :</p>
+    <input type="text" id="username" placeholder="Ton pseudo Roblox">
+    <button onclick="start()">Commencer</button>
+  </div>
 
-  <div id="missions">
+  <!-- Sections -->
+  <div id="earn-section" class="section">
     <h2>Missions disponibles :</h2>
     <button onclick="completeMission(10)">Regarder une pub (+10 points)</button>
     <button onclick="completeMission(20)">Télécharger une app (+20 points)</button>
     <button onclick="completeMission(15)">Répondre à un sondage (+15 points)</button>
     <p>Points accumulés : <span id="points">0</span></p>
     <button onclick="redeem()">Retirer Robux (simulation)</button>
-
     <div class="progress-bar">
       <div class="progress-fill" id="progress"></div>
     </div>
-    <p id="result"></p>
+  </div>
+
+  <div id="withdraw-section" class="section">
+    <h2>Retirer vos points</h2>
+    <p>Stock actuel : <span id="stock">0</span></p>
+    <p>100 Points = 10 Robux</p>
+    <input type="number" id="withdraw-points" placeholder="Nombre de points">
+    <button onclick="withdraw()">Retirer</button>
+    <p id="withdraw-result"></p>
+  </div>
+
+  <div id="code-section" class="section">
+    <h2>Entrez votre code</h2>
+    <input type="text" id="code-input" placeholder="Entrez le code">
+    <button onclick="redeemCode()">Valider</button>
+    <p>Suivez le serveur Discord pour obtenir les nouveaux codes</p>
+  </div>
+
+  <div id="giveaway-section" class="section">
+    <h2>Giveaways</h2>
+    <p>Vous pouvez participer aux giveaways après avoir complété une mission.</p>
+    <button onclick="alert('Participation simulée !')">Participer</button>
+  </div>
+
+  <div id="social-section" class="section">
+    <h2>Nos réseaux</h2>
+    <button onclick="window.open('https://discord.com','_blank')">Discord</button>
+    <button onclick="window.open('https://www.tiktok.com','_blank')">TikTok</button>
   </div>
 </div>
 
 <footer>
-  <button>Earn Robux</button>
-  <button>Withdrawal</button>
-  <button>Code</button>
-  <button>Giveaways</button>
+  <button onclick="showSection('earn-section')">Earn Robux</button>
+  <button onclick="showSection('withdraw-section')">Withdrawal</button>
+  <button onclick="showSection('code-section')">Code</button>
+  <button onclick="showSection('giveaway-section')">Giveaways</button>
 </footer>
 
 <script>
 let points = 0;
 let username = "";
+let missionDone = false;
 
 function toggleMenu() {
   let menu = document.getElementById("menu");
@@ -75,40 +107,76 @@ function toggleMenu() {
 
 function start() {
   username = document.getElementById("username").value;
-  if(username.trim() === "") { alert("❌ Merci d’entrer un pseudo."); return; }
-
-  document.getElementById("missions").style.display = "block";
-  document.getElementById("menu-username").innerText = username;
-
-  // changer avatar Roblox automatiquement
-  let userId = 1; // par défaut, tu peux remplacer par une vraie API Roblox plus tard
-  document.getElementById("avatar").src = "https://www.roblox.com/headshot-thumbnail/image?userId=" + userId + "&width=50&height=50&format=png";
-  
-  document.getElementById("result").innerText = "✅ Bienvenue " + username + " !";
+  if(username.trim()==="") { alert("❌ Merci d’entrer un pseudo."); return; }
+  document.getElementById("enter-pseudo").style.display="none";
+  document.getElementById("menu-username").innerText=username;
+  document.getElementById("menu-points-count").innerText=points;
+  showSection('earn-section');
+  updateAvatar();
 }
 
-function completeMission(value) {
-  let start = points;
-  let end = points + value;
-  let step = 1;
-  let interval = setInterval(() => {
-    if(start >= end) { clearInterval(interval); } 
-    else { start += step; document.getElementById("points").innerText = start; updateProgress(); }
-  }, 20);
-  points = end;
+function showSection(sectionId){
+  const sections = ['earn-section','withdraw-section','code-section','giveaway-section','social-section'];
+  sections.forEach(id=>{
+    const el=document.getElementById(id);
+    if(id===sectionId){
+      el.style.display='block';
+      setTimeout(()=>{el.style.opacity='1';},10);
+    } else { el.style.opacity='0'; setTimeout(()=>{el.style.display='none';},300);}
+  });
 }
 
-function redeem() {
-  if(points === 0) { alert("❌ Tu n’as aucun point à échanger."); return; }
-  alert("✅ Bravo " + username + "! Tu as échangé " + points + " points (simulation).");
-  points = 0;
-  document.getElementById("points").innerText = points;
+function completeMission(value){
+  missionDone=true;
+  let start=points;
+  let end=points+value;
+  let step=1;
+  let interval=setInterval(()=>{
+    if(start>=end) clearInterval(interval);
+    else { start+=step; document.getElementById("points").innerText=start; document.getElementById("menu-points-count").innerText=start; updateProgress(); }
+  },20);
+  points=end;
+}
+
+function redeem(){
+  if(points===0){ alert("❌ Vous n’avez aucun point à échanger."); return; }
+  alert("✅ Bravo "+username+"! Vous avez échangé "+points+" points (simulation).");
+  points=0;
+  document.getElementById("points").innerText=points;
+  document.getElementById("menu-points-count").innerText=points;
   updateProgress();
 }
 
-function updateProgress() {
-  let progress = Math.min(points, 100);
-  document.getElementById("progress").style.width = progress + "%";
+function updateProgress(){
+  let progress=Math.min(points,100);
+  document.getElementById("progress").style.width=progress+"%";
+}
+
+function withdraw(){
+  let val=parseInt(document.getElementById("withdraw-points").value);
+  if(isNaN(val) || val<=0){ alert("❌ Entrer un nombre valide."); return; }
+  if(val>points){ alert("❌ Vous n’avez pas assez de points."); return; }
+  let robux=Math.floor(val/10);
+  points-=val;
+  document.getElementById("menu-points-count").innerText=points;
+  document.getElementById("points").innerText=points;
+  document.getElementById("withdraw-result").innerText="Vous avez retiré "+robux+" Robux (simulation)";
+  updateProgress();
+}
+
+function redeemCode(){
+  let code=document.getElementById("code-input").value.trim();
+  if(code==="ROBUX10"){ points+=10; alert("✅ Code valide! +10 points"); }
+  else if(code==="ROBUX50"){ points+=50; alert("✅ Code valide! +50 points"); }
+  else { alert("❌ Code invalide"); }
+  document.getElementById("points").innerText=points;
+  document.getElementById("menu-points-count").innerText=points;
+  updateProgress();
+}
+
+function updateAvatar(){
+  let userId=1; // ici tu peux intégrer une vraie API pour changer selon le pseudo
+  document.getElementById("avatar").src="https://www.roblox.com/headshot-thumbnail/image?userId="+userId+"&width=50&height=50&format=png";
 }
 </script>
 
