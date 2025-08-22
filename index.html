@@ -3,15 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Robux Simulator</title>
+<title>BlockZone</title>
 <style>
 body { font-family: Arial; margin:0; background:#f0f0f0; }
-header { display:flex; justify-content:flex-end; padding:10px 20px; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.1); position:relative; }
+header { display:flex; justify-content:space-between; align-items:center; padding:5px 20px; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.1); position:relative; top:0; }
+header h2 { margin:0; font-size:20px; font-weight:bold; }
 .menu-btn { cursor:pointer; padding:10px; background:#ffcc00; border:none; border-radius:5px; font-weight:bold; }
 .menu-content { display:none; position:absolute; top:50px; right:20px; background:#fff; border:1px solid #ccc; border-radius:10px; padding:10px; width:220px; box-shadow:0 2px 10px rgba(0,0,0,0.2); text-align:center; }
 .menu-content img { width:50px; height:50px; border-radius:50%; margin-bottom:5px; }
 .menu-username { font-weight:bold; margin:0; }
-.menu-points { font-size:14px; margin:0; display:flex; align-items:center; justify-content:center; gap:5px; }
+.menu-points { font-size:14px; margin:5px 0; display:flex; align-items:center; justify-content:center; gap:5px; }
+.logout-btn { margin-top:5px; padding:5px 10px; background:#ff4444; color:white; border:none; border-radius:5px; cursor:pointer; }
 
 .container { text-align:center; margin:20px; background:white; padding:20px; border-radius:15px; transition: all 0.3s ease; }
 button { padding:12px 25px; margin:5px; cursor:pointer; border:none; border-radius:8px; background:linear-gradient(45deg,#ffcc00,#ff9900); color:white; font-weight:bold; transition:transform 0.2s; }
@@ -30,11 +32,13 @@ input { padding:8px; border-radius:5px; border:1px solid #ccc; width:150px; }
 <body>
 
 <header>
+  <h2>BlockZone</h2>
   <button class="menu-btn" onclick="toggleMenu()">Menu</button>
   <div class="menu-content" id="menu">
     <img id="avatar" src="https://www.roblox.com/headshot-thumbnail/image?userId=1&width=50&height=50&format=png" alt="avatar">
     <p class="menu-username" id="menu-username">Pseudo</p>
     <p class="menu-points"><img src="https://cdn.iconscout.com/icon/free/png-256/robux-282366.png" style="width:16px; vertical-align:middle;"> <span id="menu-points-count">0</span></p>
+    <button class="logout-btn" onclick="logout()">Log out</button>
   </div>
 </header>
 
@@ -108,9 +112,12 @@ function toggleMenu() {
 function start() {
   username = document.getElementById("username").value;
   if(username.trim()==="") { alert("❌ Merci d’entrer un pseudo."); return; }
+
+  localStorage.setItem("blockzone-username", username);
+
   document.getElementById("enter-pseudo").style.display="none";
   document.getElementById("menu-username").innerText=username;
-  document.getElementById("menu-points-count").innerText=points;
+  updatePointsDisplay();
   showSection('earn-section');
   updateAvatar();
 }
@@ -133,18 +140,27 @@ function completeMission(value){
   let step=1;
   let interval=setInterval(()=>{
     if(start>=end) clearInterval(interval);
-    else { start+=step; document.getElementById("points").innerText=start; document.getElementById("menu-points-count").innerText=start; updateProgress(); }
+    else { 
+      start+=step; 
+      points=start; 
+      updatePointsDisplay(); 
+      updateProgress(); 
+    }
   },20);
-  points=end;
 }
 
 function redeem(){
   if(points===0){ alert("❌ Vous n’avez aucun point à échanger."); return; }
   alert("✅ Bravo "+username+"! Vous avez échangé "+points+" points (simulation).");
   points=0;
+  updatePointsDisplay();
+  updateProgress();
+}
+
+function updatePointsDisplay(){
   document.getElementById("points").innerText=points;
   document.getElementById("menu-points-count").innerText=points;
-  updateProgress();
+  localStorage.setItem("blockzone-points", points);
 }
 
 function updateProgress(){
@@ -158,26 +174,53 @@ function withdraw(){
   if(val>points){ alert("❌ Vous n’avez pas assez de points."); return; }
   let robux=Math.floor(val/10);
   points-=val;
-  document.getElementById("menu-points-count").innerText=points;
-  document.getElementById("points").innerText=points;
+  updatePointsDisplay();
   document.getElementById("withdraw-result").innerText="Vous avez retiré "+robux+" Robux (simulation)";
   updateProgress();
 }
 
 function redeemCode(){
-  let code=document.getElementById("code-input").value.trim();
-  if(code==="ROBUX10"){ points+=10; alert("✅ Code valide! +10 points"); }
-  else if(code==="ROBUX50"){ points+=50; alert("✅ Code valide! +50 points"); }
-  else { alert("❌ Code invalide"); }
-  document.getElementById("points").innerText=points;
-  document.getElementById("menu-points-count").innerText=points;
+  let code=document.getElementById("code-input").value.trim().toUpperCase();
+  let addedPoints=0;
+  if(code==="ROBUX10"){ addedPoints=10; }
+  else if(code==="ROBUX50"){ addedPoints=50; }
+  if(addedPoints>0){
+    points+=addedPoints;
+    updatePointsDisplay();
+    alert("✅ Code valide! +"+addedPoints+" points");
+  } else { alert("❌ Code invalide"); }
   updateProgress();
 }
 
 function updateAvatar(){
-  let userId=1; // ici tu peux intégrer une vraie API pour changer selon le pseudo
+  let userId=1; 
   document.getElementById("avatar").src="https://www.roblox.com/headshot-thumbnail/image?userId="+userId+"&width=50&height=50&format=png";
 }
+
+function logout(){
+  localStorage.removeItem("blockzone-username");
+  localStorage.removeItem("blockzone-points");
+  points=0;
+  username="";
+  document.getElementById("enter-pseudo").style.display="block";
+  document.getElementById("username").value="";
+  updatePointsDisplay();
+  showSection('earn-section');
+}
+
+window.onload=function(){
+  let savedUser = localStorage.getItem("blockzone-username");
+  let savedPoints = parseInt(localStorage.getItem("blockzone-points")) || 0;
+  if(savedUser){
+    username = savedUser;
+    points = savedPoints;
+    document.getElementById("enter-pseudo").style.display="none";
+    document.getElementById("menu-username").innerText=username;
+    updatePointsDisplay();
+    showSection('earn-section');
+    updateAvatar();
+  }
+};
 </script>
 
 </body>
